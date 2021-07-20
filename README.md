@@ -78,5 +78,5 @@ Install with Poetry and start chipping away on the code!
 Run the [Morningstar](https://www.morningstar.co.uk/uk/) tests with:
 
 ```bash
-poetry run python morningstar.py
+poetry run python morningstar_test.py
 ```
