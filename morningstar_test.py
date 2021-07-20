@@ -62,73 +62,88 @@ class MorningstarTests(parameterized.TestCase):
     @parameterized.parameters(
         dict(
             isin="",
+            name="",
             expected=False,
         ),
         dict(
-            # DNB Global Indeks A
             isin="NO0010582984",
+            name="DNB Global Indeks A",
             expected=True,
         ),
         dict(
-            # DNB Teknologi A
             isin="no0010337678",
+            name="DNB Teknologi A",
             expected=True,
         ),
         dict(
-            # Odin Eiendom C
+            #
             isin="NO0010062953",
+            name="ODIN Eiendom C",
             expected=True,
         ),
         dict(
             # Fidelity China Consumer Fund W-Accumulation
             isin="GB00B82ZSC67",
+            name="",
             expected=False,
         ),
     )
-    def test_get_fund_nor(self, isin: str, expected: bool):
+    def test_get_fund_nor(self, isin: str, name: str, expected: bool):
         fund = morningstar.get_fund_nor(isin)
 
         if expected:
+            self.assertIsNotNone(fund)
             self.assertEqual(fund.isin, isin)
+            self.assertEqual(fund.name, name)
+            self.assertIsNotNone(fund.day_change)
+            self.assertIsNotNone(fund.ongoing_charge)
         else:
             self.assertIsNone(fund)
 
     @parameterized.parameters(
         dict(
             isin="",
+            name="",
             expected=False,
         ),
         dict(
             # DNB Global Indeks A
             isin="NO0010582984",
+            name="",
             expected=False,
         ),
         dict(
             # DNB Teknologi A
             isin="no0010337678",
+            name="",
             expected=False,
         ),
         dict(
             # Odin Eiendom C
             isin="NO0010062953",
+            name="",
             expected=False,
         ),
         dict(
-            # Fidelity China Consumer Fund W-Accumulation
             isin="GB00B82ZSC67",
+            name="Fidelity China Consumer Fund W-Accumulation",
             expected=True,
         ),
         dict(
-            # Vanguard Pacific ex-Japan Stock Index Fund GBP Acc
             isin="IE00B523l313",
+            name="Vanguard Pacific ex-Japan Stock Index Fund GBP Acc",
             expected=True,
         ),
     )
-    def test_get_fund_uk(self, isin: str, expected: bool):
+    def test_get_fund_uk(self, isin: str, name: str, expected: bool):
         fund = morningstar.get_fund_uk(isin)
 
         if expected:
+            self.assertIsNotNone(fund)
             self.assertEqual(fund.isin, isin)
+            self.assertEqual(fund.name, name)
+            self.assertIsNotNone(fund.day_change)
+            self.assertIsNotNone(fund.ongoing_charge)
         else:
             self.assertIsNone(fund)
 
