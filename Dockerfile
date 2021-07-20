@@ -14,7 +14,7 @@ ENV PYTHONFAULTHANDLER=1 \
   PYTHONPATH="$PYTHONPATH:/runtime/lib/python3.9/site-packages" 
 
 # System deps:
-RUN apt-get update && apt-get install -y build-essential unzip wget python-dev
+RUN apt-get update && apt-get install -y build-essential unzip wget python-dev git
 RUN pip install poetry
 
 WORKDIR /src
