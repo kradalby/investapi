@@ -1,15 +1,12 @@
 from typing import Mapping, Any, Optional
-from datetime import datetime, timedelta
 
 from fastapi import FastAPI, HTTPException
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from expiringdict import ExpiringDict
 
-from investpy import funds
 import yfinance as yf
-
-from pandas import Timestamp
+import morningstar
 
 
 DATE_FORMAT = "%d/%m/%Y"
@@ -36,17 +33,15 @@ async def fetch_stock(ticker: str) -> Optional[yf.Ticker]:
     return tick
 
 
-async def fetch_fund(isin: str) -> Optional[Mapping[str, Any]]:
+async def fetch_fund(isin: str) -> Optional[morningstar.MorningstarFund]:
     if isin in FUNDS.keys():
         return FUNDS[isin]
 
-    try:
-        fund = funds.search_funds("isin", isin).to_dict("records")[0]
+    fund = morningstar.get_fund(isin)
+    if fund:
         FUNDS[isin] = fund
 
         return fund
-    except RuntimeError:
-        return None
 
 
 @app.get("/v1/fund/{isin}")
@@ -59,53 +54,38 @@ async def get_fund(isin: str):
 
 
 @app.get("/v1/fund/{isin}/name")
-async def get_fund_name(isin: str):
+async def get_fund_name(isin: str) -> str:
     fund = await fetch_fund(isin)
     if not fund:
         raise HTTPException(status_code=404, detail="not found")
 
-    name: str = fund["name"]
-    return name
+    return fund.name
 
 
 @app.get("/v1/fund/{isin}/currency")
-async def get_fund_currency(isin: str):
+async def get_fund_currency(isin: str) -> str:
     fund = await fetch_fund(isin)
     if not fund:
         raise HTTPException(status_code=404, detail="not found")
 
-    currency: str = fund["currency"]
-    if currency.upper() == "GBX":
-        return "GBP".encode("utf-8")
-    return currency.encode("utf-8")
+    if fund.currency.upper() == "GBX":
+        return "GBP"
+    return fund.currency
 
 
 @app.get("/v1/fund/{isin}/price")
-async def get_fund_price(isin: str):
+async def get_fund_price(isin: str) -> float:
     fund = await fetch_fund(isin)
     if not fund:
         raise HTTPException(status_code=404, detail="not found")
 
-    prices: Mapping[Timestamp, Mapping] = funds.get_fund_historical_data(
-        fund["name"],
-        fund["country"],
-        (datetime.now() - timedelta(days=7)).strftime(DATE_FORMAT),
-        datetime.now().strftime(DATE_FORMAT),
-    ).to_dict("index")
-
-    last_date = sorted(prices.keys())[-1]
-
-    last_price = prices[last_date]
-
-    close_price: int = last_price["Close"]
-
-    if last_price["Currency"].upper() == "GBX":
-        return close_price / 100
-    return close_price
+    if fund.currency.upper() == "GBX":
+        return fund.price / 100
+    return fund.price
 
 
 @app.get("/v1/stock/{ticker}")
-async def get_stock(ticker: str):
+async def get_stock(ticker: str) -> Mapping[str, Any]:
     tick = await fetch_stock(ticker)
     if not tick:
         raise HTTPException(status_code=404, detail="not found")
@@ -115,7 +95,7 @@ async def get_stock(ticker: str):
 
 
 @app.get("/v1/stock/{ticker}/name")
-async def get_stock_name(ticker: str):
+async def get_stock_name(ticker: str) -> str:
     tick = await fetch_stock(ticker)
     if not tick:
         raise HTTPException(status_code=404, detail="not found")
@@ -130,7 +110,7 @@ async def get_stock_name(ticker: str):
 
 
 @app.get("/v1/stock/{ticker}/currency")
-async def get_stock_currency(ticker: str):
+async def get_stock_currency(ticker: str) -> str:
     tick = await fetch_stock(ticker)
     if not tick:
         raise HTTPException(status_code=404, detail="not found")
@@ -139,12 +119,12 @@ async def get_stock_currency(ticker: str):
     currency: str = info["currency"]
 
     if currency.upper() == "GBX" or currency == "GBp":
-        return "GBP".encode("utf-8")
-    return currency.encode("utf-8")
+        return "GBP"
+    return currency
 
 
 @app.get("/v1/stock/{ticker}/price")
-async def get_stock_price(ticker: str):
+async def get_stock_price(ticker: str) -> float:
     tick = await fetch_stock(ticker)
     if not tick:
         raise HTTPException(status_code=404, detail="not found")
