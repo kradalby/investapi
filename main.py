@@ -20,7 +20,10 @@ FUNDS = ExpiringDict(max_len=100, max_age_seconds=3600)
 
 async def fetch_stock(ticker: str) -> Optional[yf.Ticker]:
     if ticker in STOCKS.keys():
-        return STOCKS[ticker]
+        try:
+            return STOCKS.get(ticker)
+        except KeyError:
+            pass
 
     tick = yf.Ticker(ticker)
 
@@ -35,7 +38,10 @@ async def fetch_stock(ticker: str) -> Optional[yf.Ticker]:
 
 async def fetch_fund(isin: str) -> Optional[morningstar.MorningstarFund]:
     if isin in FUNDS.keys():
-        return FUNDS[isin]
+        try:
+            return FUNDS.get(isin)
+        except KeyError:
+            pass
 
     fund = morningstar.get_fund(isin)
     if fund:
