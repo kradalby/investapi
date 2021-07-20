@@ -45,7 +45,7 @@ async def fetch_fund(isin: str) -> Optional[morningstar.MorningstarFund]:
 
 
 @app.get("/v1/fund/{isin}")
-async def get_fund(isin: str):
+async def get_fund(isin: str) -> morningstar.MorningstarFund:
     fund = await fetch_fund(isin)
     if not fund:
         raise HTTPException(status_code=404, detail="not found")
