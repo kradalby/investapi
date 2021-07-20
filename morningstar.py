@@ -18,6 +18,11 @@ class MorningstarFund(BaseModel):
 
 
 def get_fund(isin: str) -> Optional[MorningstarFund]:
+    if isin.upper().startswith("NO"):
+        nor = get_fund_nor(isin)
+        if nor:
+            return nor
+
     uk = get_fund_uk(isin)
     if uk:
         return uk
