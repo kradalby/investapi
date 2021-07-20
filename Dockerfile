@@ -26,6 +26,8 @@ RUN pip install --prefix=/runtime --force-reinstall -r requirements.txt
 
 COPY . /src
 
+RUN python morningstar_test.py
+
 FROM base AS runtime
 
 COPY --from=builder /runtime /usr/local
