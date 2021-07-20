@@ -106,11 +106,11 @@ def get_fund_nor(isin: str) -> Optional[MorningstarFund]:
 
     if "Endring 1 dag" in overview:
         change = overview["Endring 1 dag"]
-        fund["previous_day_change"] = change
+        fund["day_change"] = change
 
     if "Løpende kostnader" in overview:
         costs = overview["Løpende kostnader"]
-        fund["running_costs"] = costs
+        fund["ongoing_charge"] = costs
 
     return MorningstarFund(**fund)
 
