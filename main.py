@@ -89,6 +89,30 @@ async def get_fund_price(isin: str) -> float:
     return fund.price
 
 
+@app.get("/v1/fund/{isin}/ongoing_charge")
+async def get_fund_price(isin: str) -> str:
+    fund = await fetch_fund(isin)
+    if not fund:
+        raise HTTPException(status_code=404, detail="not found")
+
+    if not fund.ongoing_charge:
+        raise HTTPException(status_code=404, detail="not found")
+
+    return fund.ongoing_charge
+
+
+@app.get("/v1/fund/{isin}/day_change")
+async def get_fund_price(isin: str) -> str:
+    fund = await fetch_fund(isin)
+    if not fund:
+        raise HTTPException(status_code=404, detail="not found")
+
+    if not fund.day_change:
+        raise HTTPException(status_code=404, detail="not found")
+
+    return fund.day_change
+
+
 @app.get("/v1/stock/{ticker}")
 async def get_stock(ticker: str) -> Mapping[str, Any]:
     tick = await fetch_stock(ticker)
