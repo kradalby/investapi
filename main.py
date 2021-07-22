@@ -28,12 +28,10 @@ async def fetch_stock(ticker: str) -> Optional[yf.Ticker]:
     tick = yf.Ticker(ticker)
 
     # Tickers that has left than 2 items in their info seems to be non existent or delisted
-    if len(tick.info.keys()) < 5:
-        return None
+    if len(tick.info.keys()) > 5:
+        STOCKS[ticker] = tick
 
-    STOCKS[ticker] = tick
-
-    return tick
+        return tick
 
 
 async def fetch_fund(isin: str) -> Optional[morningstar.MorningstarFund]:
@@ -44,6 +42,7 @@ async def fetch_fund(isin: str) -> Optional[morningstar.MorningstarFund]:
             pass
 
     fund = morningstar.get_fund(isin)
+
     if fund:
         FUNDS[isin] = fund
 
