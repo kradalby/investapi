@@ -19,11 +19,9 @@ FUNDS = ExpiringDict(max_len=100, max_age_seconds=3600)
 
 
 async def fetch_stock(ticker: str) -> Optional[yf.Ticker]:
-    if ticker in STOCKS.keys():
-        try:
-            return STOCKS.get(ticker)
-        except KeyError:
-            pass
+    tick = STOCKS.get(ticker)
+    if tick:
+        return tick
 
     tick = yf.Ticker(ticker)
 
@@ -35,11 +33,9 @@ async def fetch_stock(ticker: str) -> Optional[yf.Ticker]:
 
 
 async def fetch_fund(isin: str) -> Optional[morningstar.MorningstarFund]:
-    if isin in FUNDS.keys():
-        try:
-            return FUNDS.get(isin)
-        except KeyError:
-            pass
+    fund = FUNDS.get(isin)
+    if fund:
+        return fund
 
     fund = morningstar.get_fund(isin)
 
@@ -90,7 +86,7 @@ async def get_fund_price(isin: str) -> float:
 
 
 @app.get("/v1/fund/{isin}/ongoing_charge")
-async def get_fund_price(isin: str) -> str:
+async def get_fund_ongoing_charge(isin: str) -> str:
     fund = await fetch_fund(isin)
     if not fund:
         raise HTTPException(status_code=404, detail="not found")
@@ -102,7 +98,7 @@ async def get_fund_price(isin: str) -> str:
 
 
 @app.get("/v1/fund/{isin}/day_change")
-async def get_fund_price(isin: str) -> str:
+async def get_fund_day_change(isin: str) -> str:
     fund = await fetch_fund(isin)
     if not fund:
         raise HTTPException(status_code=404, detail="not found")
